@@ -24,19 +24,19 @@ public class JDGConsoleApp {
     private static final Logger logger = LogManager.getLogger(JDGConsoleApp.class);
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        
-        // Common Global configuration with a default transport 
+
+        // Common Global configuration with a default transport
         GlobalConfiguration globalConfig = new GlobalConfigurationBuilder()
                 .transport()
                 .defaultTransport()
                 .build();
-        
+
         // Define configuration for Replicated cache in Synchronous mode
         Configuration replConfig = new ConfigurationBuilder()
                 .clustering()
                 .cacheMode(CacheMode.REPL_SYNC)
                 .build();
-        
+
         // Define configuration for Distributed cache in Synchronous mode
         Configuration distConfig = new ConfigurationBuilder()
                 .clustering()
@@ -44,19 +44,31 @@ public class JDGConsoleApp {
                 .build();
 
         EmbeddedCacheManager cacheManager = new DefaultCacheManager(globalConfig);
-        
+
         // Use the following two lines only when using the programmatic configuration
-        cacheManager.defineConfiguration("replCache", replConfig);
         cacheManager.defineConfiguration("distCache", distConfig);
-        
-        Cache<String, String> cache = cacheManager.getCache("distCache");
+        cacheManager.defineConfiguration("replCache", replConfig);
+
+        Cache<String, String> replCache = cacheManager.getCache("replCache");
 
         if(cacheManager.isCoordinator()) {
             logger.info("*** This node is the coordinator ***");
-            IntStream.range(1, 101).parallel().forEach( i -> cache.put("key"+i, "value"+i));
+            IntStream.range(1, 101).parallel().forEach( i -> replCache.put("key"+i, "value"+i));
         }
 
-        logger.info("The size of the cache is : {}, mode of the cache is : {} ", cache.size(),
-                cache.getCacheConfiguration().clustering().cacheMode());
+        logger.info("The size of the cache is : {}, mode of the cache is : {} ", replCache.size(),
+                replCache.getCacheConfiguration().clustering().cacheMode());
+
+        Cache<String, String> distCache = cacheManager.getCache("distCache");
+
+        if(cacheManager.isCoordinator()) {
+            logger.info("*** This node is the coordinator ***");
+            IntStream.range(1, 101).parallel().forEach( i -> distCache.put("key"+i, "value"+i));
+        }
+
+
+        logger.info("The size of the cache is : {}, mode of the cache is : {} ", distCache.size(),
+                  distCache.getCacheConfiguration().clustering().cacheMode());
+
     }
 }

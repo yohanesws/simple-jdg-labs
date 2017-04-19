@@ -25,6 +25,7 @@ public class JDGConsoleApp {
                 .build();
 
         // Pass in string literal "infinispan.xml" for declarative c
+        // EmbeddedCacheManager cacheManager = new DefaultCacheManager("infinispan.xml");
         EmbeddedCacheManager cacheManager = new DefaultCacheManager(configuration);
         Cache<String, String> cache = cacheManager.getCache("localCache");
 

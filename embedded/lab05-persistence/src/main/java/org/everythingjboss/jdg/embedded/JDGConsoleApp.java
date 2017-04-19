@@ -21,13 +21,13 @@ public class JDGConsoleApp {
     private static final Logger logger = LogManager.getLogger(JDGConsoleApp.class);
 
     public static void main(String[] args) throws IOException {
-        
-        // Common Global configuration with a default transport 
+
+        // Common Global configuration with a default transport
         GlobalConfiguration globalConfig = new GlobalConfigurationBuilder()
                 .transport()
                 .defaultTransport()
                 .build();
-        
+
         // Define configuration for Distributed cache in Synchronous mode
         Configuration config = new ConfigurationBuilder()
                 .clustering()
@@ -41,13 +41,14 @@ public class JDGConsoleApp {
                     .addSingleFileStore()
                         .maxEntries(5000)
                         .location(System.getProperty("cacheStorePath"))
-                .build();            
+                .build();
 
-        EmbeddedCacheManager cacheManager = new DefaultCacheManager(globalConfig,config);
+        // EmbeddedCacheManager cacheManager = new DefaultCacheManager(globalConfig,config);
+        EmbeddedCacheManager cacheManager = new DefaultCacheManager("infinispan.xml");
         Cache<String, String> cache = cacheManager.getCache("persistentCache");
-        
+
         IntStream.range(1, 101).parallel().forEach( i -> cache.put("key"+i, "value"+i));
-        
+
         logger.info("The size of the cache is : {}, mode of the cache is : {} ", cache.size(),
                 cache.getCacheConfiguration().clustering().cacheMode());
     }

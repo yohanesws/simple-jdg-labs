@@ -32,9 +32,10 @@ public class JDGConsoleApp {
                     .wakeUpInterval(100)
                 .build();
 
-        EmbeddedCacheManager cacheManager = new DefaultCacheManager(configuration);
+        // EmbeddedCacheManager cacheManager = new DefaultCacheManager(configuration);
+        EmbeddedCacheManager cacheManager = new DefaultCacheManager("infinispan.xml");
         Cache<String, String> cache = cacheManager.getCache("boundedCache");
-        
+
         IntStream.range(1, 76).parallel().forEach( i -> cache.put("key"+i, "value"+i));
 
         // The size should be reported as 50 here as the rest 25 should be evicted out
@@ -42,11 +43,11 @@ public class JDGConsoleApp {
                 cache.getCacheConfiguration().clustering().cacheMode());
 
         Thread.sleep(11000);
-        
+
         // The size should be reported as 0 here as the entries should have expired by now
         logger.info("The size of the cache after expiration is : {}, mode of the cache is : {} ", cache.size(),
                 cache.getCacheConfiguration().clustering().cacheMode());
-        
+
         cacheManager.stop();
     }
 }
